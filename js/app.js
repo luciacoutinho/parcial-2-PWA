@@ -1,14 +1,10 @@
-//avigator.serviceWorker.register('sw.js');
-if (navigator.serviceWorker) {
- navigator.serviceWorker.register('sw.js')
-}
-
+navigator.serviceWorker.register('../sw.js');
 const btnSave = document.querySelector('#btn-save');
 const textArea = document.querySelector('#text-1');
 let container = document.querySelector('.collection');
 let lista = [];
-// FORMATO:
-//let lista = [ { nota: 'descripción de la nota', fecha: '17/11/2022'} ];
+let btnsEliminar = [];
+let idnotas = 0
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -20,14 +16,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
  lista = leerNotas();
  renderizarNotas(lista);
+ idnotas = lista.length;
 });
 
 /* - FUNCION 1: Obtiene el texto del textArea y guarda en el texto en el array - */
 btnSave.addEventListener('click', () => {
  // console.log(lista)
-
- let valorTextarea = textArea.value;
- lista.push(valorTextarea);
+ idnotas++
+ let getFecha = new Date().toLocaleString();
+ let nota = {
+  nota: textArea.value,
+  fecha: getFecha,
+  id: idnotas
+ }
+ lista.push(nota);
+ textArea.value = "";
  console.log(lista)
 
  guardarNotas(lista);
@@ -51,12 +54,52 @@ function leerNotas() {
 function renderizarNotas(array) {
  console.log(array)
 
- let html = '';
+ // let html = '';
+ let btnid = 0;
 
+
+ container.innerHTML = "";
  for (const nota of array) {
-  console.log(nota);
-  html += `<li>${nota}</li> `
+
+  btnid++;
+  let li = document.createElement("li");
+  let tachito = document.createElement("i");
+  tachito.setAttribute("class", "bi bi-trash float-right btn-delete");
+  tachito.setAttribute("id", btnid);
+  li.appendChild(tachito);
+  li.innerHTML = `<span>${nota.fecha}</span><br>${nota.nota}<i class="bi bi-trash float-right btn-delete eliminar" id="${nota.id}"></i>`;
+
+
+  container.appendChild(li);
+
+
+
  }
 
- container.innerHTML = html
+ btnsEliminar = document.querySelectorAll('.eliminar');
+ btnsEliminar.forEach(btn => {
+  btn.addEventListener('click', () => {
+   eliminarTask(parseInt(btn.id))
+  })
+ })
+
+
+}
+
+
+/* -------- Eliminar notas ------- */
+
+function eliminarTask(id) {
+ let index = null;
+ for (const i in lista) {
+
+  console.log(lista[i])
+  if (lista[i].id === id) {
+   index = i;
+  }
+ }
+ console.log("Index" + index);
+ console.log("Lista" + lista);
+ lista.splice(index, 1);
+ guardarNotas(lista)
 }
